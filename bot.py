@@ -3,13 +3,14 @@ import logging
 import config
 import json
 import os
-from aiogram import Bot, Dispatcher, types, F
+
+from aiogram import Bot, Dispatcher, F
 from aiogram.filters.command import Command
-from aiogram.filters import Command
+from aiogram.types import Message
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
-from datetime import datetime
+
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
@@ -20,17 +21,16 @@ bot = Bot(
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML
         # ParseMode.MARKDOWN_V2
-        # тут ещё много других интересных настроек
     )
 )
 
 # Диспетчер
 dp = Dispatcher(storage=MemoryStorage())
-dp["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+# Инициализация файла с данными пользователей
 
 USER_DATA_FILE = "user_data.json"
 
-# Инициализация файла с данными пользователей
 if not os.path.exists(USER_DATA_FILE):
     with open(USER_DATA_FILE, "w") as f:
         json.dump({}, f)
@@ -44,7 +44,7 @@ def save_user_data(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 @dp.message(Command("start"))
-async def send_welcome(message: types.Message):
+async def send_welcome(message: Message):
     user_data = load_user_data()
     user_id = str(message.from_user.id)
     
@@ -59,7 +59,7 @@ async def send_welcome(message: types.Message):
         )
 
 @dp.message(F.text)
-async def handle_user_data(message: types.Message):
+async def handle_user_data(message: Message):
     user_data = load_user_data()
     user_id = str(message.from_user.id)
 
@@ -81,15 +81,6 @@ async def handle_user_data(message: types.Message):
         )
     except ValueError:
         await message.answer("Пожалуйста, отправьте данные в правильном формате: ФИО, возраст")
-
-@dp.message(lambda message: "," in message.text)
-async def handle_user_data(message: types.Message):
-    user_data = load_user_data()
-    user_id = str(message.from_user.id)
-
-    
-
-    
 
 
 # Запуск процесса поллинга новых апдейтов

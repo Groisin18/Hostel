@@ -1,3 +1,5 @@
 /env
 .env
 config.py
+user_data.json
+/__pycache__
