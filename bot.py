@@ -11,13 +11,33 @@ from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
 
+class Checking:
+
+    def __init__(self, *args):
+        data = list(args)
+        self.fio = data[0]
+        self.age = data[1]
+
+    def check_data(self):
+        def check_fio():
+            pass
+
+        def check_age():
+            pass
+        check_fio()
+        check_age()
+
+        return None
+
+
+
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 
 # Объект бота
 bot = Bot(
-    token=config.config.BOT_TOKEN,
+    token=config.BOT_TOKEN,
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML
         # ParseMode.MARKDOWN_V2
@@ -32,22 +52,22 @@ dp = Dispatcher(storage=MemoryStorage())
 USER_DATA_FILE = "user_data.json"
 
 if not os.path.exists(USER_DATA_FILE):
-    with open(USER_DATA_FILE, "w") as f:
+    with open(USER_DATA_FILE, "w", encoding='UTF-8') as f:
         json.dump({}, f)
 
 def load_user_data():
-    with open(USER_DATA_FILE, "r") as f:
+    with open(USER_DATA_FILE, "r", encoding='UTF-8') as f:
         return json.load(f)
 
 def save_user_data(data):
-    with open(USER_DATA_FILE, "w") as f:
+    with open(USER_DATA_FILE, "w", encoding='UTF-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 @dp.message(Command("start"))
 async def send_welcome(message: Message):
     user_data = load_user_data()
     user_id = str(message.from_user.id)
-    
+
     if user_id in user_data:
         user_info = user_data[user_id]
         await message.answer(
@@ -66,15 +86,18 @@ async def handle_user_data(message: Message):
     if user_id in user_data:
         await message.answer("Вы уже зарегистрированы. Если хотите изменить данные, обратитесь к администратору.")
         return
-    
+
     try:
         name, age = map(str.strip, message.text.split(","))
         age = int(age)
-        
+        checker = Checking(name, age)
+        checker.check_data()
+# Надо реализовать проверку данных
+
         # Сохранение данных
         user_data[user_id] = {"name": name, "age": age}
         save_user_data(user_data)
-        
+
         await message.answer(
             f"Спасибо! Ваши данные зарегистрированы:\n<b>Имя:</b> {name}\n<b>Возраст:</b> {age}",
             parse_mode=ParseMode.HTML
@@ -89,5 +112,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-    
