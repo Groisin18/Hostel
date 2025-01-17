@@ -2,4 +2,5 @@
 .env
 config.py
 user_data.json
+database/user_data.json
 /__pycache__
